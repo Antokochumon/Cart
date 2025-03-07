@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{product.Name}}</title>
+
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+
+    <!-- Swiper CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css" />
+
+    <!-- Custom CSS -->
+    <style>
+        /* Product Image Styling */
+        .main-image {
+            width: 100%;
+            height: 400px;
+            object-fit: contain;
+            border-radius: 10px;
+            transition: transform 0.3s ease-in-out;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        .main-image:hover {
+            transform: scale(1.05);
+        }
+
+        /* Price and Buy Now */
+        .product-price {
+            font-size: 24px;
+            color: #e60000;
+            font-weight: bold;
+        }
+        .btn-add-cart, .btn-buy-now {
+            font-size: 18px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 5px;
+            transition: all 0.3s ease-in-out;
+        }
+        .btn-add-cart {
+            background-color: #28a745;
+            color: white;
+        }
+        .btn-add-cart:hover {
+            background-color: #218838;
+        }
+        .btn-buy-now {
+            background-color: #ff9900;
+            color: white;
+            font-weight: bold;
+        }
+        .btn-buy-now:hover {
+            background-color: #e68a00;
+        }
+
+        /* Responsive Adjustments */
+        @media (max-width: 768px) {
+            .main-image {
+                height: 300px;
+            }
+        }
+
+        /* Swiper Container Styling */
+        .swiper-container {
+            width: 100%;
+            height: 400px;
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .swiper-slide {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            background-color: #f8f9fa;
+        }
+
+        .swiper-slide img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+            border-radius: 10px;
+        }
+
+        .swiper-button-next, .swiper-button-prev {
+            color: #000;
+            background-color: rgba(255, 255, 255, 0.8);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        .swiper-button-next::after, .swiper-button-prev::after {
+            font-size: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-5">
+        <div class="row">
+            <!-- Image Section -->
+            <div class="col-md-6">
+                <div class="swiper-container">
+                    <div class="swiper-wrapper">
+                        <!-- Main Image -->
+                        <div class="swiper-slide">
+                            {{#if product._id}}
+                                <img src="/product-images/{{product._id}}.jpg" alt="{{product.Name}}" class="img-fluid rounded shadow main-image">
+                            {{else}}
+                                <img src="/Users/Kochumon/Pictures/DCIM/pexels-pixabay-210186%20-%20Copy.jpg" alt="No Image Available" class="img-fluid rounded shadow main-image">
+                            {{/if}}
+                        </div>
+
+                        <!-- Additional Images -->
+                        {{#if product.additionalImages}}
+                            {{#each product.additionalImages}}
+                                <div class="swiper-slide">
+                                    <img src="/product-images/{{product._id}}" alt="Additional Image {{@index}}" class="img-fluid rounded shadow main-image">
+                                </div>
+                            {{/each}}
+                        {{/if}}
+                    </div>
+
+                    <!-- Add Navigation Buttons -->
+                    <div class="swiper-button-next"></div>
+                    <div class="swiper-button-prev"></div>
+                </div>
+            </div>
+
+            <!-- Product Details -->
+            <div class="col-md-6">
+                <h2 style="font-weight: bold; color:#000000;">{{product.Name}}</h2>
+                <p class="product-price">£{{product.Price}}</p>
+                <p>{{product.Description}}</p>
+
+                <button onclick="addToCart('{{product._id}}')" class="btn btn-add-cart">
+                    <i class="fas fa-shopping-cart"></i> Add to Cart
+                </button>
+                <button onclick="buyNow()" class="btn btn-buy-now mt-3">
+                    <i class="fas fa-bolt"></i> Buy Now
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- jQuery and Bootstrap JS -->
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+    <!-- Swiper JS -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+
+    <!-- Initialize Swiper -->
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const swiper = new Swiper('.swiper-container', {
+                loop: true, // Enable infinite loop
+                navigation: {
+                    nextEl: '.swiper-button-next',
+                    prevEl: '.swiper-button-prev',
+                },
+                autoplay: {
+                    delay: 3000, // Auto-slide every 3 seconds (optional)
+                },
+            });
+        });
+
+        function addToCart(productId) {
+            fetch('/add-to-cart/' + productId, { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert('Product added to cart!');
+                    }
+                });
+        }
+
+        function buyNow() {
+            window.location.href = "/cart";
+        }
+    </script>
+</body>
+</html>
+
