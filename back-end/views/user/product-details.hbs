@@ -4,6 +4,11 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{product.Name}}</title>
+    <meta name="description" content="{{product.Description}}">
+    <meta property="og:title" content="{{product.Name}}">
+    <meta property="og:description" content="{{product.Description}}">
+    <meta property="og:image" content="/product-images/{{product.Image}}.jpg">
+    <meta property="og:url" content="{{currentUrl}}">
 
     <!-- Bootstrap CSS -->
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
@@ -64,6 +69,14 @@
                 height: 300px;
             }
         }
+        @media (max-width: 576px) {
+            .main-image {
+                height: 250px;
+            }
+            .col-md-6 {
+                margin-bottom: 20px;
+            }
+        }
 
         /* Swiper Container Styling */
         .swiper-container {
@@ -114,27 +127,31 @@
                     <div class="swiper-wrapper">
                         <!-- Main Image -->
                         <div class="swiper-slide">
-                            {{#if product._id}}
-                                <img src="/product-images/{{this.Image
-}}.jpg" alt="{{product.Name}}" class="img-fluid rounded shadow main-image">
+                            {{#if product.Image}}
+                                <img src="/product-images/{{product.Image}}.jpg" alt="{{product.Name}}" class="img-fluid rounded shadow main-image">
                             {{else}}
-                                <img src="/Users/Kochumon/Pictures/DCIM/pexels-pixabay-210186%20-%20Copy.jpg" alt="No Image Available" class="img-fluid rounded shadow main-image">
+                                <img src="/path/to/default-image.jpg" alt="No Image Available" class="img-fluid rounded shadow main-image">
                             {{/if}}
                         </div>
 
                         <!-- Additional Images -->
-                        {{#if product.additionalImages}}
+                        {{#if product.additionalImages.length}}
                             {{#each product.additionalImages}}
                                 <div class="swiper-slide">
-                                    <img src="/product-images/{{this.Image}}" alt="Additional Image {{@index}}" class="img-fluid rounded shadow main-image">
+                                    <img src="/product-images/{{this}}" alt="Additional Image {{@index}}" class="img-fluid rounded shadow main-image">
                                 </div>
                             {{/each}}
+                        {{else}}
+                            <div class="swiper-slide">
+                                <p>No additional images available.</p>
+                            </div>
                         {{/if}}
                     </div>
 
                     <!-- Add Navigation Buttons -->
                     <div class="swiper-button-next"></div>
                     <div class="swiper-button-prev"></div>
+                    <div class="swiper-pagination"></div>
                 </div>
             </div>
 
@@ -144,10 +161,10 @@
                 <p class="product-price">£{{product.Price}}</p>
                 <p>{{product.Description}}</p>
 
-                <button onclick="addToCart('{{product._id}}')" class="btn btn-add-cart">
+                <button onclick="addToCart('{{product._id}}')" class="btn btn-add-cart" aria-label="Add to Cart">
                     <i class="fas fa-shopping-cart"></i> Add to Cart
                 </button>
-                <button onclick="buyNow()" class="btn btn-buy-now mt-3">
+                <button onclick="buyNow()" class="btn btn-buy-now mt-3" aria-label="Buy Now">
                     <i class="fas fa-bolt"></i> Buy Now
                 </button>
             </div>
@@ -165,13 +182,21 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             const swiper = new Swiper('.swiper-container', {
-                loop: true, // Enable infinite loop
+                loop: true,
                 navigation: {
                     nextEl: '.swiper-button-next',
                     prevEl: '.swiper-button-prev',
                 },
+                pagination: {
+                    el: '.swiper-pagination',
+                    clickable: true,
+                },
+                keyboard: {
+                    enabled: true,
+                },
                 autoplay: {
-                    delay: 3000, // Auto-slide every 3 seconds (optional)
+                    delay: 3000,
+                    disableOnInteraction: false,
                 },
             });
         });
@@ -182,14 +207,19 @@
                 .then(data => {
                     if (data.success) {
                         alert('Product added to cart!');
+                    } else {
+                        alert('Failed to add product to cart.');
                     }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred. Please try again.');
                 });
         }
 
         function buyNow() {
-            window.location.href = "/cart";
+            window.location.href = "/cart?productId={{product._id}}";
         }
     </script>
 </body>
 </html>
-
