@@ -115,7 +115,8 @@
                         <!-- Main Image -->
                         <div class="swiper-slide">
                             {{#if product._id}}
-                                <img src="/product-images/{{product._id}}.jpg" alt="{{product.Name}}" class="img-fluid rounded shadow main-image">
+                                <img src="/product-images/{{this.Image
+}}.jpg" alt="{{product.Name}}" class="img-fluid rounded shadow main-image">
                             {{else}}
                                 <img src="/Users/Kochumon/Pictures/DCIM/pexels-pixabay-210186%20-%20Copy.jpg" alt="No Image Available" class="img-fluid rounded shadow main-image">
                             {{/if}}
@@ -125,7 +126,7 @@
                         {{#if product.additionalImages}}
                             {{#each product.additionalImages}}
                                 <div class="swiper-slide">
-                                    <img src="/product-images/{{product._id}}" alt="Additional Image {{@index}}" class="img-fluid rounded shadow main-image">
+                                    <img src="/product-images/{{this.Image}}" alt="Additional Image {{@index}}" class="img-fluid rounded shadow main-image">
                                 </div>
                             {{/each}}
                         {{/if}}
