@@ -32,20 +32,42 @@ router.post('/add-product', async (req, res) => {
         let productData = req.body;
         let image = req.files.Image;
 
+        // Ensure that additional images are handled properly
+        let additionalImages = req.files.additionalImages ? Array.isArray(req.files.additionalImages) ? req.files.additionalImages : [req.files.additionalImages] : [];
+
+        // Assign filenames to productData
+        productData.Image = `${Date.now()}_${image.name}`; // Main image filename
+        productData.additionalImages = additionalImages.map((img, index) => `${Date.now()}_${index}_${img.name}`); // Additional image filenames
+
+        // Insert the product and get the product ID
         let productId = await productHelpers.addProduct(productData);
 
-        let uploadPath = path.join(__dirname, '../public/product-images', `${productId}.jpg`);
+        // Upload the main image
+        let uploadPath = path.join(__dirname, '../public/product-images', productData.Image);
         
         if (!fs.existsSync(path.dirname(uploadPath))) {
             fs.mkdirSync(path.dirname(uploadPath), { recursive: true });
         }
 
+        // Move the main image
         image.mv(uploadPath, (err) => {
             if (err) {
                 console.error("Image upload failed:", err);
                 return res.status(500).send('Image upload failed');
             }
-            res.redirect('/admin');
+
+            // Now handle the additional images
+            additionalImages.forEach((img, index) => {
+                let additionalImagePath = path.join(__dirname, '../public/product-images', productData.additionalImages[index]);
+                img.mv(additionalImagePath, (err) => {
+                    if (err) {
+                        console.error("Additional image upload failed:", err);
+                    }
+                });
+            });
+
+            // After uploading all images, redirect to the admin page
+            res.redirect('/admin/add-product');
         });
     } catch (error) {
         console.error("Error adding product:", error);
@@ -82,20 +104,31 @@ router.get('/edit-product/:id', async (req, res) => {
 router.post('/edit-product/:id', async (req, res) => {
     try {
         let productId = req.params.id;
-        await productHelpers.updateProduct(productId, req.body);
+        let productData = req.body;
 
         if (req.files && req.files.Image) {
             let image = req.files.Image;
-            let uploadPath = path.join(__dirname, '../public/product-images', `${productId}.jpg`);
+            let newImageName = `${Date.now()}_${image.name}`; // Generate a new unique filename
+            let uploadPath = path.join(__dirname, '../public/product-images', newImageName);
 
-            image.mv(uploadPath, (err) => {
+            // Move the new image to the upload directory
+            image.mv(uploadPath, async (err) => {
                 if (err) {
                     console.error("Image upload failed:", err);
                     return res.status(500).send('Image upload failed');
                 }
+
+                // Update the product data with the new image filename
+                productData.Image = newImageName;
+
+                // Update the product in the database
+                await productHelpers.updateProduct(productId, productData);
+
                 res.redirect('/admin');
             });
         } else {
+            // If no new image is uploaded, update the product without changing the image
+            await productHelpers.updateProduct(productId, productData);
             res.redirect('/admin');
         }
     } catch (error) {
@@ -103,7 +136,6 @@ router.post('/edit-product/:id', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
-
 
 const multer = require('multer');
 
@@ -133,7 +165,7 @@ router.post('/add-product', upload.fields([
 
         // Save additional images
         if (req.files['additionalImages']) {
-            product.additionalImages = req.files['additionalImages'][0].filename;// Save additional image filenames
+            product.additionalImages = req.files['additionalImages'].map(file => file.filename); // Save additional image filenames
         } else {
             product.additionalImages = []; // Empty array if no additional images
         }
@@ -146,7 +178,5 @@ router.post('/add-product', upload.fields([
         res.status(500).send("Error adding product");
     }
 });
-
-
 
 module.exports = router;
