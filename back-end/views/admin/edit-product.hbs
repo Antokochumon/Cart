@@ -1,42 +1,65 @@
 <div class="container mt-4">
     <div class="row">
-
-
-
-        <div class="col-md-6">
+        <div class="col-md-6 offset-md-3">
             <div class="text-center">
-                <h2>Edit product</h2>
-
+                <h2>Edit Product</h2>
+            </div>
+            <form action="/admin/edit-product/{{product._id}}" method="post" enctype="multipart/form-data">
+                <!-- Product Name -->
+                <div class="form-group">
+                    <label for="name">Name</label>
+                    <input type="text" name="Name" class="form-control" value="{{product.Name}}" required>
                 </div>
-            <form action="/admin/edit-product/{{product._id}}" enctype="multipart/form-data"     method="post">
-                <label for="" >Name</label>
-                <input type="text" name="Name" class="form-control" value="{{product.Name}}">
 
-                <label for="" >Category</label>
-                <input type="text" name="Category" class="form-control" value="{{product.Category}}">
+                <!-- Product Category -->
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" name="Category" class="form-control" value="{{product.Category}}" required>
+                </div>
 
-                
-                <label for="" >Price</label>
-                <input type="text" name="Price" class="form-control" value="{{product.Price}}">
+                <!-- Product Price -->
+                <div class="form-group">
+                    <label for="price">Price</label>
+                    <input type="number" name="Price" class="form-control" value="{{product.Price}}" step="0.01" required>
+                </div>
 
-                
-                <label for="" >Description</label>
-                <input type="text" name="Description" class="form-control" value="{{product.Description}}">
+                <!-- Product Description -->
+                <div class="form-group">
+                    <label for="description">Description</label>
+                    <textarea name="Description" class="form-control" rows="3" required>{{product.Description}}</textarea>
+                </div>
 
-                
-                <label for="" >Image</label>
-                <img src="/product-images/{{product._id}}.jpg" alt="" style="width:100px; height:auto;" id="imgView" class="pt-3">
-                <input type="file" name="Image" class="form-control" onchange="viewImage(event)">
-                
-                <button type="submit" class="btn btn-success mt-4">Sumit</button>
+                <!-- Product Image -->
+                <div class="form-group">
+                    <label for="image">Current Image</label>
+                    <img src="/product-images/{{product.Image}}" alt="{{product.Name}}" style="width: 100px; height: auto;" id="imgView" class="d-block mb-2">
+                    <label for="image">Upload New Image</label>
+                    <input type="file" name="Image" class="form-control-file" onchange="viewImage(event)">
+                </div>
 
+                <!-- Additional Images (Optional) -->
+                {{#if product.additionalImages.length}}
+                    <div class="form-group">
+                        <label>Additional Images</label>
+                        <div class="d-flex flex-wrap">
+                            {{#each product.additionalImages}}
+                                <img src="/product-images/{{this}}" alt="Additional Image {{@index}}" style="width: 80px; height: auto; margin: 5px;">
+                            {{/each}}
+                        </div>
+                        <label>Upload New Additional Images</label>
+                        <input type="file" name="additionalImages" class="form-control-file" multiple>
+                    </div>
+                {{/if}}
 
+                <!-- Submit Button -->
+                <button type="submit" class="btn btn-success mt-4">Submit</button>
             </form>
         </div>
     </div>
 </div>
+
 <script>
-    function viewImage(event){
-        document.getElementById('imgView').src=URL.createObjectURL(event.target.files[0])
+    function viewImage(event) {
+        document.getElementById('imgView').src = URL.createObjectURL(event.target.files[0]);
     }
 </script>
