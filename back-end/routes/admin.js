@@ -1,4 +1,4 @@
-admin.js.    const express = require('express');
+const express = require('express');
 const router = express.Router();
 const productHelpers = require('../helpers/product-helpers');
 const path = require('path');
