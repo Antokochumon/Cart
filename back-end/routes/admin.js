@@ -100,12 +100,19 @@ router.get('/edit-product/:id', async (req, res) => {
     }
 });
 
+
+
+
+
 // Handle Edit Product
-// Handle Edit Product
+
 router.post('/edit-product/:id', async (req, res) => {
     try {
         let productId = req.params.id;
         let productData = req.body;
+
+        console.log("Request Body:", req.body); // Debugging
+        console.log("Request Files:", req.files); // Debugging
 
         // Fetch the existing product to get old image filenames
         let existingProduct = await productHelpers.getProductDetails(productId);
@@ -119,6 +126,8 @@ router.post('/edit-product/:id', async (req, res) => {
             let newImageName = `${Date.now()}_${image.name}`; // Generate a new unique filename
             let uploadPath = path.join(__dirname, '../public/product-images', newImageName);
 
+            console.log("New Main Image Path:", uploadPath); // Debugging
+
             // Move the new image to the upload directory
             image.mv(uploadPath, async (err) => {
                 if (err) {
@@ -129,6 +138,8 @@ router.post('/edit-product/:id', async (req, res) => {
                 // Delete the old main image
                 if (existingProduct.Image) {
                     let oldImagePath = path.join(__dirname, '../public/product-images', existingProduct.Image);
+                    console.log("Old Main Image Path:", oldImagePath); // Debugging
+
                     if (fs.existsSync(oldImagePath)) {
                         fs.unlinkSync(oldImagePath);
                     }
@@ -143,6 +154,8 @@ router.post('/edit-product/:id', async (req, res) => {
                     if (existingProduct.additionalImages && existingProduct.additionalImages.length > 0) {
                         existingProduct.additionalImages.forEach(image => {
                             let oldImagePath = path.join(__dirname, '../public/product-images', image);
+                            console.log("Old Additional Image Path:", oldImagePath); // Debugging
+
                             if (fs.existsSync(oldImagePath)) {
                                 fs.unlinkSync(oldImagePath);
                             }
@@ -155,6 +168,8 @@ router.post('/edit-product/:id', async (req, res) => {
                     // Move the new additional images to the upload directory
                     req.files.additionalImages.forEach((img, index) => {
                         let additionalImagePath = path.join(__dirname, '../public/product-images', productData.additionalImages[index]);
+                        console.log("New Additional Image Path:", additionalImagePath); // Debugging
+
                         img.mv(additionalImagePath, (err) => {
                             if (err) {
                                 console.error("Additional image upload failed:", err);
@@ -180,6 +195,8 @@ router.post('/edit-product/:id', async (req, res) => {
                 if (existingProduct.additionalImages && existingProduct.additionalImages.length > 0) {
                     existingProduct.additionalImages.forEach(image => {
                         let oldImagePath = path.join(__dirname, '../public/product-images', image);
+                        console.log("Old Additional Image Path:", oldImagePath); // Debugging
+
                         if (fs.existsSync(oldImagePath)) {
                             fs.unlinkSync(oldImagePath);
                         }
@@ -192,6 +209,8 @@ router.post('/edit-product/:id', async (req, res) => {
                 // Move the new additional images to the upload directory
                 req.files.additionalImages.forEach((img, index) => {
                     let additionalImagePath = path.join(__dirname, '../public/product-images', productData.additionalImages[index]);
+                    console.log("New Additional Image Path:", additionalImagePath); // Debugging
+
                     img.mv(additionalImagePath, (err) => {
                         if (err) {
                             console.error("Additional image upload failed:", err);
@@ -212,6 +231,9 @@ router.post('/edit-product/:id', async (req, res) => {
         res.status(500).send('Server error');
     }
 });
+
+
+
 
 const multer = require('multer');
 
