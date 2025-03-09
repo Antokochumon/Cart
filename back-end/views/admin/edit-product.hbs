@@ -40,14 +40,18 @@
                 <!-- Additional Images (Optional) -->
                 {{#if product.additionalImages.length}}
                     <div class="form-group">
-                        <label>Additional Images</label>
-                        <div class="d-flex flex-wrap">
+                        <label>Current Additional Images</label>
+                        <div class="d-flex flex-wrap" id="currentAdditionalImages">
                             {{#each product.additionalImages}}
-                                <img src="/product-images/{{this}}" alt="Additional Image {{@index}}" style="width: 80px; height: auto; margin: 5px;">
+                                <div class="image-container" style="position: relative; margin: 5px;">
+                                    <img src="/product-images/{{this}}" alt="Additional Image {{@index}}" style="width: 80px; height: auto;">
+                                    <button type="button" class="btn btn-danger btn-sm" style="position: absolute; top: 0; right: 0;" onclick="removeAdditionalImage('{{this}}')">×</button>
+                                </div>
                             {{/each}}
                         </div>
                         <label>Upload New Additional Images</label>
-                        <input type="file" name="additionalImages" class="form-control-file" multiple>
+                        <input type="file" name="additionalImages" class="form-control-file" multiple onchange="previewAdditionalImages(event)">
+                        <div class="d-flex flex-wrap mt-2" id="additionalImagesPreview"></div>
                     </div>
                 {{/if}}
 
@@ -59,7 +63,50 @@
 </div>
 
 <script>
+    // Preview main image
     function viewImage(event) {
         document.getElementById('imgView').src = URL.createObjectURL(event.target.files[0]);
+    }
+
+    // Preview additional images
+    function previewAdditionalImages(event) {
+        const previewContainer = document.getElementById('additionalImagesPreview');
+        previewContainer.innerHTML = ''; // Clear previous previews
+
+        const files = event.target.files;
+        for (let i = 0; i < files.length; i++) {
+            const file = files[i];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+                const img = document.createElement('img');
+                img.src = e.target.result;
+                img.style.width = '80px';
+                img.style.height = 'auto';
+                img.style.margin = '5px';
+                previewContainer.appendChild(img);
+            };
+
+            reader.readAsDataURL(file);
+        }
+    }
+
+    // Remove additional image
+    function removeAdditionalImage(imageName) {
+        if (confirm('Are you sure you want to remove this image?')) {
+            // Send a request to remove the image
+            fetch(`/admin/remove-additional-image/{{product._id}}?imageName=${imageName}`, {
+                method: 'DELETE'
+            }).then(response => {
+                if (response.ok) {
+                    // Reload the page to reflect the changes
+                    window.location.reload();
+                } else {
+                    alert('Failed to remove image');
+                }
+            }).catch(error => {
+                console.error('Error:', error);
+            });
+        }
     }
 </script>
